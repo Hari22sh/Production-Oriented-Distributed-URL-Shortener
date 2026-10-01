@@ -1,0 +1,47 @@
+﻿# ─── Dependencies (reinstalled inside image) ────
+node_modules/
+
+# ─── Build output (rebuilt inside image) ────────
+dist/
+build/
+
+# ─── Git ────────────────────────────────────────
+.git/
+.gitignore
+
+# ─── Environment / Secrets ──────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Logs ───────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+
+# ─── OS files ───────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── IDE / Editor ───────────────────────────────
+.vscode/
+.idea/
+
+# ─── Test / Coverage ────────────────────────────
+coverage/
+.nyc_output/
+test/
+
+# ─── Docker files (no need to copy into image) ──
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# ─── CI / Docs ──────────────────────────────────
+.github/
+README.md
+
+# ─── Misc ───────────────────────────────────────
+tmp/
+temp/
+.cache/
