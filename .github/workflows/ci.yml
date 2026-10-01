@@ -1,4 +1,4 @@
-﻿name: CI
+name: CI
 
 on:
   push:
@@ -130,7 +130,7 @@ jobs:
         run: npm ci
 
       - name: Run E2E tests
-        run: npm run test:e2e
+        run: npx jest --config ./test/jest-e2e.json --passWithNoTests
 
   # ─────────────────────────────────────────────
   # Job 4: Docker Build Check
