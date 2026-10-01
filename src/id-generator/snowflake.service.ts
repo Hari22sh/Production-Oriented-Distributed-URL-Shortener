@@ -1,10 +1,10 @@
-import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 export class ClockMovedBackwardsException extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "ClockMovedBackwardsException";
+    this.name = 'ClockMovedBackwardsException';
   }
 }
 
@@ -22,8 +22,7 @@ export class SnowflakeService implements OnModuleInit {
   private readonly maxSequence: bigint = -1n ^ (-1n << this.sequenceBits); // 4095
 
   private readonly workerIdShift: bigint = this.sequenceBits; // 12
-  private readonly timestampShift: bigint =
-    this.sequenceBits + this.workerIdBits; // 22
+  private readonly timestampShift: bigint = this.sequenceBits + this.workerIdBits; // 22
 
   private workerId: bigint = 1n;
   private sequence: bigint = 0n;
@@ -32,7 +31,7 @@ export class SnowflakeService implements OnModuleInit {
   constructor(private readonly configService: ConfigService) {}
 
   onModuleInit() {
-    const configuredWorkerId = this.configService.get<number>("workerId") ?? 1;
+    const configuredWorkerId = this.configService.get<number>('workerId') ?? 1;
     this.setWorkerId(BigInt(configuredWorkerId));
   }
 
@@ -41,9 +40,7 @@ export class SnowflakeService implements OnModuleInit {
       throw new Error(`Worker ID must be between 0 and ${this.maxWorkerId}`);
     }
     this.workerId = workerId;
-    this.logger.log(
-      `SnowflakeService initialized with Worker ID: ${this.workerId}`,
-    );
+    this.logger.log(`SnowflakeService initialized with Worker ID: ${this.workerId}`);
   }
 
   public getWorkerId(): bigint {
@@ -64,7 +61,7 @@ export class SnowflakeService implements OnModuleInit {
         timestamp = this.tilNextMillis(this.lastTimestamp);
       } else {
         throw new ClockMovedBackwardsException(
-          `Clock moved backwards by ${offset}ms. Refusing to generate ID.`,
+          `Clock moved backwards by ${offset}ms. Refusing to generate ID.`
         );
       }
     }

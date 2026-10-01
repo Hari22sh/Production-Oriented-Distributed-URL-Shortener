@@ -1,11 +1,6 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import Redis from "ioredis";
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import Redis from 'ioredis';
 
 export interface CachedUrlData {
   originalUrl: string;
@@ -20,14 +15,13 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   private readonly defaultTtlSeconds: number;
 
   constructor(private readonly configService: ConfigService) {
-    this.defaultTtlSeconds =
-      this.configService.get<number>("redis.ttlSeconds") ?? 86400;
+    this.defaultTtlSeconds = this.configService.get<number>('redis.ttlSeconds') ?? 86400;
   }
 
   onModuleInit() {
-    const host = this.configService.get<string>("redis.host") || "localhost";
-    const port = this.configService.get<number>("redis.port") || 6379;
-    const password = this.configService.get<string>("redis.password");
+    const host = this.configService.get<string>('redis.host') || 'localhost';
+    const port = this.configService.get<number>('redis.port') || 6379;
+    const password = this.configService.get<string>('redis.password');
 
     this.client = new Redis({
       host,
@@ -38,18 +32,18 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       retryStrategy: (times) => Math.min(times * 100, 2000),
     });
 
-    this.client.on("error", (err) => {
+    this.client.on('error', (err) => {
       this.logger.error(`Redis connection error: ${err.message}`, err.stack);
     });
 
-    this.client.on("connect", () => {
+    this.client.on('connect', () => {
       this.logger.log(`Connected to Redis at ${host}:${port}`);
     });
 
     // Attempt initial connection asynchronously
     this.client.connect().catch((err) => {
       this.logger.warn(
-        `Failed to connect to Redis initially: ${err.message}. Operations will fallback to DB.`,
+        `Failed to connect to Redis initially: ${err.message}. Operations will fallback to DB.`
       );
     });
   }
@@ -74,9 +68,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       if (!data) return null;
       return JSON.parse(data) as CachedUrlData;
     } catch (error: any) {
-      this.logger.error(
-        `Redis GET error for key ${shortCode}: ${error.message}`,
-      );
+      this.logger.error(`Redis GET error for key ${shortCode}: ${error.message}`);
       return null;
     }
   }
@@ -84,11 +76,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   /**
    * Stores URL data in Redis cache with TTL.
    */
-  async set(
-    shortCode: string,
-    data: CachedUrlData,
-    customTtlSeconds?: number,
-  ): Promise<boolean> {
+  async set(shortCode: string, data: CachedUrlData, customTtlSeconds?: number): Promise<boolean> {
     try {
       const key = this.getCacheKey(shortCode);
       let ttl = customTtlSeconds ?? this.defaultTtlSeconds;
@@ -107,12 +95,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         ttl = Math.min(ttl, remainingSeconds);
       }
 
-      await this.client.set(key, JSON.stringify(data), "EX", ttl);
+      await this.client.set(key, JSON.stringify(data), 'EX', ttl);
       return true;
     } catch (error: any) {
-      this.logger.error(
-        `Redis SET error for key ${shortCode}: ${error.message}`,
-      );
+      this.logger.error(`Redis SET error for key ${shortCode}: ${error.message}`);
       return false;
     }
   }
@@ -132,7 +118,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       } catch (error: any) {
         attempt++;
         this.logger.warn(
-          `Attempt ${attempt}/${maxRetries} to delete Redis key ${key} failed: ${error.message}`,
+          `Attempt ${attempt}/${maxRetries} to delete Redis key ${key} failed: ${error.message}`
         );
         if (attempt < maxRetries) {
           await new Promise((resolve) => setTimeout(resolve, attempt * 100));
@@ -140,9 +126,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    this.logger.error(
-      `Failed to invalidate Redis cache key ${key} after ${maxRetries} attempts`,
-    );
+    this.logger.error(`Failed to invalidate Redis cache key ${key} after ${maxRetries} attempts`);
     return false;
   }
 

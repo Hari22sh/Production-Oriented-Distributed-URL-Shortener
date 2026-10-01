@@ -5,20 +5,17 @@ import {
   NotFoundException,
   BadRequestException,
   GoneException,
-} from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { ConfigService } from "@nestjs/config";
-import { UrlEntity } from "./entities/url.entity";
-import { CreateUrlDto } from "./dto/create-url.dto";
-import { UrlResponseDto } from "./dto/url-response.dto";
-import { SnowflakeService } from "../id-generator/snowflake.service";
-import { Base62Service } from "../encoding/base62.service";
-import { RedisService } from "../cache/redis.service";
-import {
-  URL_SAFETY_CHECKER,
-  UrlSafetyChecker,
-} from "../safety/url-safety.interface";
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import { UrlEntity } from './entities/url.entity';
+import { CreateUrlDto } from './dto/create-url.dto';
+import { UrlResponseDto } from './dto/url-response.dto';
+import { SnowflakeService } from '../id-generator/snowflake.service';
+import { Base62Service } from '../encoding/base62.service';
+import { RedisService } from '../cache/redis.service';
+import { URL_SAFETY_CHECKER, UrlSafetyChecker } from '../safety/url-safety.interface';
 
 @Injectable()
 export class UrlService {
@@ -33,10 +30,9 @@ export class UrlService {
     private readonly redisService: RedisService,
     @Inject(URL_SAFETY_CHECKER)
     private readonly urlSafetyChecker: UrlSafetyChecker,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {
-    this.baseUrl =
-      this.configService.get<string>("baseUrl") || "http://localhost:3000";
+    this.baseUrl = this.configService.get<string>('baseUrl') || 'http://localhost:3000';
   }
 
   /**
@@ -49,10 +45,10 @@ export class UrlService {
     if (dto.expiresAt) {
       expiresAtDate = new Date(dto.expiresAt);
       if (isNaN(expiresAtDate.getTime())) {
-        throw new BadRequestException("Invalid expiresAt date format");
+        throw new BadRequestException('Invalid expiresAt date format');
       }
       if (expiresAtDate.getTime() <= Date.now()) {
-        throw new BadRequestException("Expiration time must be in the future");
+        throw new BadRequestException('Expiration time must be in the future');
       }
     }
 
@@ -62,8 +58,7 @@ export class UrlService {
     });
 
     if (existing) {
-      const isExpired =
-        existing.expiresAt && existing.expiresAt.getTime() <= Date.now();
+      const isExpired = existing.expiresAt && existing.expiresAt.getTime() <= Date.now();
       if (!isExpired) {
         return this.formatResponse(existing.shortCode, existing.expiresAt);
       }
@@ -83,26 +78,21 @@ export class UrlService {
 
     try {
       await this.urlRepository.save(urlEntity);
-      this.logger.log(
-        `Created short URL: shortCode=${shortCode}, originalUrl=${dto.originalUrl}`,
-      );
+      this.logger.log(`Created short URL: shortCode=${shortCode}, originalUrl=${dto.originalUrl}`);
 
       return this.formatResponse(shortCode, expiresAtDate);
     } catch (error: any) {
       // Catch duplicate key constraint violation (PostgreSQL 23505) under race conditions
-      if (error.code === "23505" || error.message?.includes("duplicate key")) {
+      if (error.code === '23505' || error.message?.includes('duplicate key')) {
         this.logger.warn(
-          `Concurrent insert collision for originalUrl '${dto.originalUrl}'. Fetching existing record.`,
+          `Concurrent insert collision for originalUrl '${dto.originalUrl}'. Fetching existing record.`
         );
         const racedRecord = await this.urlRepository.findOne({
           where: { originalUrl: dto.originalUrl },
         });
 
         if (racedRecord && racedRecord.isActive) {
-          return this.formatResponse(
-            racedRecord.shortCode,
-            racedRecord.expiresAt,
-          );
+          return this.formatResponse(racedRecord.shortCode, racedRecord.expiresAt);
         }
       }
       throw error;
@@ -118,9 +108,7 @@ export class UrlService {
     });
 
     if (!urlRecord || !urlRecord.isActive) {
-      throw new NotFoundException(
-        `Short code '${shortCode}' not found or deactivated`,
-      );
+      throw new NotFoundException(`Short code '${shortCode}' not found or deactivated`);
     }
 
     if (urlRecord.expiresAt && urlRecord.expiresAt.getTime() <= Date.now()) {
@@ -133,17 +121,13 @@ export class UrlService {
   /**
    * Deactivates/Deletes a short URL record and invalidates Redis cache.
    */
-  async deleteUrl(
-    shortCode: string,
-  ): Promise<{ success: boolean; message: string }> {
+  async deleteUrl(shortCode: string): Promise<{ success: boolean; message: string }> {
     const urlRecord = await this.urlRepository.findOne({
       where: { shortCode },
     });
 
     if (!urlRecord || !urlRecord.isActive) {
-      throw new NotFoundException(
-        `Short code '${shortCode}' not found or already deactivated`,
-      );
+      throw new NotFoundException(`Short code '${shortCode}' not found or already deactivated`);
     }
 
     // 1. Soft delete in DB
@@ -153,19 +137,14 @@ export class UrlService {
     // 2. Invalidate Redis key
     await this.redisService.del(shortCode);
 
-    this.logger.log(
-      `Deactivated short code '${shortCode}' and invalidated Redis cache.`,
-    );
+    this.logger.log(`Deactivated short code '${shortCode}' and invalidated Redis cache.`);
     return {
       success: true,
       message: `Short code '${shortCode}' deactivated successfully`,
     };
   }
 
-  private formatResponse(
-    shortCode: string,
-    expiresAt?: Date | null,
-  ): UrlResponseDto {
+  private formatResponse(shortCode: string, expiresAt?: Date | null): UrlResponseDto {
     return {
       shortCode,
       shortUrl: `${this.baseUrl}/${shortCode}`,

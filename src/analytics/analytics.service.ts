@@ -1,7 +1,7 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { KafkaProducer } from "./kafka.producer";
-import { KafkaConsumer } from "./kafka.consumer";
-import { ClickEventDto } from "./dto/click-event.dto";
+import { Injectable, Logger } from '@nestjs/common';
+import { KafkaProducer } from './kafka.producer';
+import { KafkaConsumer } from './kafka.consumer';
+import { ClickEventDto } from './dto/click-event.dto';
 
 @Injectable()
 export class AnalyticsService {
@@ -9,7 +9,7 @@ export class AnalyticsService {
 
   constructor(
     private readonly kafkaProducer: KafkaProducer,
-    private readonly kafkaConsumer: KafkaConsumer,
+    private readonly kafkaConsumer: KafkaConsumer
   ) {}
 
   /**
@@ -21,7 +21,7 @@ export class AnalyticsService {
     originalUrl: string,
     rawIp?: string,
     userAgent?: string,
-    referrer?: string,
+    referrer?: string
   ): Promise<void> {
     try {
       const anonymizedIp = this.anonymizeIp(rawIp);
@@ -57,19 +57,19 @@ export class AnalyticsService {
    * IPv6: 2001:db8:85a3::8a2e:370:7334 -> 2001:db8:85a3::xxxx
    */
   private anonymizeIp(ip?: string): string {
-    if (!ip) return "0.0.0.0";
-    if (ip.includes(".")) {
-      const parts = ip.split(".");
+    if (!ip) return '0.0.0.0';
+    if (ip.includes('.')) {
+      const parts = ip.split('.');
       if (parts.length === 4) {
         return `${parts[0]}.${parts[1]}.${parts[2]}.xxx`;
       }
     }
-    if (ip.includes(":")) {
-      const parts = ip.split(":");
+    if (ip.includes(':')) {
+      const parts = ip.split(':');
       if (parts.length > 3) {
-        return `${parts.slice(0, 3).join(":")}::xxxx`;
+        return `${parts.slice(0, 3).join(':')}::xxxx`;
       }
     }
-    return "xxx.xxx.xxx.xxx";
+    return 'xxx.xxx.xxx.xxx';
   }
 }

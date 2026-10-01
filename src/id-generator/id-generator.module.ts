@@ -1,5 +1,5 @@
-import { Module } from "@nestjs/common";
-import { SnowflakeService } from "./snowflake.service";
+import { Module } from '@nestjs/common';
+import { SnowflakeService } from './snowflake.service';
 
 @Module({
   providers: [SnowflakeService],
