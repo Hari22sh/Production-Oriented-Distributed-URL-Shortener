@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { RedisService } from '../cache/redis.service';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { RedisService } from "../cache/redis.service";
 
 @Injectable()
 export class RateLimitService {
@@ -10,18 +10,20 @@ export class RateLimitService {
 
   constructor(
     private readonly redisService: RedisService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {
     this.windowSeconds =
-      this.configService.get<number>('rateLimit.windowSeconds') ?? 60;
+      this.configService.get<number>("rateLimit.windowSeconds") ?? 60;
     this.maxRequests =
-      this.configService.get<number>('rateLimit.maxRequests') ?? 30;
+      this.configService.get<number>("rateLimit.maxRequests") ?? 30;
   }
 
-  async isRateLimited(identifier: string): Promise<{ limited: boolean; remaining: number }> {
+  async isRateLimited(
+    identifier: string,
+  ): Promise<{ limited: boolean; remaining: number }> {
     try {
       const redis = this.redisService.getClient();
-      if (!redis || redis.status !== 'ready') {
+      if (!redis || redis.status !== "ready") {
         // Fallback if Redis is down
         return { limited: false, remaining: this.maxRequests };
       }

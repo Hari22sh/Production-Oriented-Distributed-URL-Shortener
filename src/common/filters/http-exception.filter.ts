@@ -5,8 +5,8 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-} from '@nestjs/common';
-import { Request, Response } from 'express';
+} from "@nestjs/common";
+import { Request, Response } from "express";
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -25,11 +25,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const exceptionResponse =
       exception instanceof HttpException
         ? exception.getResponse()
-        : { message: 'Internal server error' };
+        : { message: "Internal server error" };
 
-    const requestId = (request.headers['x-request-id'] as string) || 'N/A';
+    const requestId = (request.headers["x-request-id"] as string) || "N/A";
 
-    let errorDetails = typeof exceptionResponse === 'object' ? exceptionResponse : { message: exceptionResponse };
+    let errorDetails =
+      typeof exceptionResponse === "object"
+        ? exceptionResponse
+        : { message: exceptionResponse };
 
     const responsePayload = {
       statusCode: status,
@@ -43,13 +46,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (status >= 500) {
       this.logger.error(
         `[${requestId}] ${request.method} ${request.url} - ${status} - Error: ${
-          exception instanceof Error ? exception.message : JSON.stringify(exception)
+          exception instanceof Error
+            ? exception.message
+            : JSON.stringify(exception)
         }`,
-        exception instanceof Error ? exception.stack : undefined
+        exception instanceof Error ? exception.stack : undefined,
       );
     } else {
       this.logger.warn(
-        `[${requestId}] ${request.method} ${request.url} - ${status} - ${JSON.stringify(errorDetails)}`
+        `[${requestId}] ${request.method} ${request.url} - ${status} - ${JSON.stringify(errorDetails)}`,
       );
     }
 

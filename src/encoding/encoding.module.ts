@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { Base62Service } from './base62.service';
+import { Module } from "@nestjs/common";
+import { Base62Service } from "./base62.service";
 
 @Module({
   providers: [Base62Service],

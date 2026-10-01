@@ -5,31 +5,31 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
-} from 'typeorm';
+} from "typeorm";
 
-@Entity({ name: 'urls' })
-@Index(['shortCode'], { unique: true })
-@Index(['originalUrl'], { unique: true })
-@Index(['expiresAt'])
+@Entity({ name: "urls" })
+@Index(["shortCode"], { unique: true })
+@Index(["originalUrl"], { unique: true })
+@Index(["expiresAt"])
 export class UrlEntity {
-  @PrimaryColumn({ type: 'bigint' })
+  @PrimaryColumn({ type: "bigint" })
   id!: string; // Snowflake ID stored as bigint string
 
-  @Column({ type: 'varchar', length: 16, unique: true })
+  @Column({ type: "varchar", length: 16, unique: true })
   shortCode!: string;
 
-  @Column({ type: 'text', unique: true })
+  @Column({ type: "text", unique: true })
   originalUrl!: string;
 
-  @Column({ type: 'timestamptz', nullable: true })
+  @Column({ type: "timestamptz", nullable: true })
   expiresAt!: Date | null;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ type: "timestamptz" })
   updatedAt!: Date;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: "boolean", default: true })
   isActive!: boolean;
 }

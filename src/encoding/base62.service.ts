@@ -1,9 +1,9 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException } from "@nestjs/common";
 
 @Injectable()
 export class Base62Service {
   private readonly chars =
-    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   private readonly base = 62n;
   private readonly charMap: Map<string, bigint> = new Map();
 
@@ -17,17 +17,17 @@ export class Base62Service {
    * Encodes a numeric ID (bigint or number) into a Base62 string.
    */
   public encode(num: bigint | number): string {
-    let value = typeof num === 'number' ? BigInt(num) : num;
+    let value = typeof num === "number" ? BigInt(num) : num;
 
     if (value < 0n) {
-      throw new BadRequestException('Cannot encode negative numbers');
+      throw new BadRequestException("Cannot encode negative numbers");
     }
 
     if (value === 0n) {
       return this.chars[0];
     }
 
-    let encoded = '';
+    let encoded = "";
     while (value > 0n) {
       const remainder = value % this.base;
       encoded = this.chars[Number(remainder)] + encoded;
@@ -42,7 +42,7 @@ export class Base62Service {
    */
   public decode(str: string): bigint {
     if (!str || str.length === 0) {
-      throw new BadRequestException('Short code cannot be empty');
+      throw new BadRequestException("Short code cannot be empty");
     }
 
     let result = 0n;
